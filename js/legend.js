@@ -169,33 +169,6 @@ Legend.prototype.initVis = function() {
         .attr("class", "release_button")
         .style("text-anchor", "middle");
 
-    vis.full_bend = vis.svg.append("rect")
-        .attr("id", "legend_full_b")
-        .attr("x", vis.width/2 + vis.inner_margin*.5)
-        .attr("y", vis.inner_margin*4 + 3*(vis.height-vis.inner_margin*5)/4)
-        .attr('width', vis.width/2 - vis.inner_margin*1.5)
-        .attr("height", (vis.height-vis.inner_margin)/4 - vis.inner_margin)
-        .attr("rx", 4)
-        .attr("ry", 4)
-        .attr("class", "full_bend_button")
-        .attr("fill", "lightgrey");
-
-    vis.svg.append("text")
-        .attr("x", vis.width/2 + vis.inner_margin*.5 + (vis.width/2 - vis.inner_margin*1.5) *.5)
-        .attr("y", vis.inner_margin*4 + 3*(vis.height-vis.inner_margin*5)/4 + ((vis.height-vis.inner_margin)/4 - vis.inner_margin)/2 - 10)
-        .attr("alignment-baseline", "middle")
-        .text("↑")
-        .attr("class", "full_bend_button")
-        .style("text-anchor", "middle");
-
-    vis.svg.append("text")
-        .attr("x", vis.width/2 + vis.inner_margin*.5 + (vis.width/2 - vis.inner_margin*1.5) *.5)
-        .attr("y", vis.inner_margin*4 + 3*(vis.height-vis.inner_margin*5)/4 + ((vis.height-vis.inner_margin)/4 - vis.inner_margin)/2 + 10)
-        .attr("alignment-baseline", "middle")
-        .text("full")
-        .attr("class", "full_bend_button")
-        .style("text-anchor", "middle");
-
     vis.UpdateVis()
 };
 
@@ -335,27 +308,6 @@ Legend.prototype.UpdateVis = function() {
             } else {
                 vis.release.attr("fill", "green").style("opacity", .75);
                 FretBoard.current_tone = "r";
-            }
-        }
-    });
-
-    d3.selectAll(".full_bend_button").on("click", function() {
-        if (!multiple) {
-            full_bend = !full_bend;
-
-            toggle_off(vis.hammer); hammer_on = false;
-            toggle_off(vis.pull); pull_off = false;
-            toggle_off(vis.slide_up); slide_up = false;
-            toggle_off(vis.slide_down); slide_down = false;
-            toggle_off(vis.bend); bend = false;
-            toggle_off(vis.release); release = false;
-
-            if (full_bend === false) {
-                vis.full_bend.attr("fill", "lightgrey").style("opacity", 1);
-                FretBoard.current_tone = "-";
-            } else {
-                vis.full_bend.attr("fill", "green").style("opacity", .75);
-                FretBoard.current_tone = "bf";
             }
         }
     });

@@ -95,6 +95,9 @@ Tab.prototype.TabAddition = function() {
     };
 
     vis.MarkerMove();
+    if (typeof insert_mode !== 'undefined' && insert_mode) {
+        vis.showCursor();
+    }
 };
 
 Tab.prototype.MarkerMove = function() {
@@ -106,6 +109,10 @@ Tab.prototype.MarkerMove = function() {
     vis.mark
         .attr("y", 7 + 17.6*7*(mark_location.length - 1))
         .attr("x", 1 + (2+mark_location[mark_location.length - 1].length)*9)
+
+    if (typeof insert_mode !== 'undefined' && insert_mode) {
+        vis.showCursor();
+    }
 };
 
 Tab.prototype.clearTab = function() {
@@ -182,4 +189,26 @@ Tab.prototype.loadTabFromText = function(text) {
     // Set counter to end
     Tab.counter = maxLen - 1;
     vis.TabAddition();
+};
+
+Tab.prototype.showCursor = function() {
+    var vis = this;
+    // Remove any existing cursor
+    vis.svg.selectAll('.tab_cursor').remove();
+    // Calculate position for the cursor
+    var x = vis.margin.left + (Tab.counter + 3) * vis.font_width;
+    var y = vis.margin.top + insert_cursor_string * 17.5 - 12;
+    vis.svg.append('rect')
+        .attr('class', 'tab_cursor')
+        .attr('x', x)
+        .attr('y', y)
+        .attr('width', vis.font_width)
+        .attr('height', 20)
+        .attr('fill', 'orange')
+        .attr('opacity', 0.5);
+};
+
+Tab.prototype.hideCursor = function() {
+    var vis = this;
+    vis.svg.selectAll('.tab_cursor').remove();
 };

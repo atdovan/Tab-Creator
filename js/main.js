@@ -35,6 +35,7 @@ var saved_chords = [];
 var saved_chords_map = [];
 
 var insert_mode = false;
+var insert_cursor_string = 0; // 0-5, which string is selected for editing
 
 document.addEventListener("keydown", keyPressed, false);
 
@@ -147,8 +148,6 @@ function keyPressed(event) {
                     Legend.hammer.attr("fill", "green").style("opacity", .75);
                 }
             } else if (event['key'] === "f") {
-                full_bend = !full_bend;
-
                 toggle_off(Legend.hammer);
                 hammer_on = false;
                 toggle_off(Legend.pull);
@@ -162,13 +161,7 @@ function keyPressed(event) {
                 toggle_off(Legend.release);
                 release = false;
 
-                if (full_bend === false) {
-                    Legend.full_bend.attr("fill", "lightgrey").style("opacity", 1);
-                    FretBoard.current_tone = "-";
-                } else {
-                    Legend.full_bend.attr("fill", "green").style("opacity", .75);
-                    FretBoard.current_tone = "bf";
-                }
+                FretBoard.current_tone = "f";
             } else if (event['key'] === "p") {
                 pull_off = !pull_off
 
@@ -298,6 +291,36 @@ function keyPressed(event) {
                 }
             }
         }
+        // VIM-like insert mode logic
+        else if (event['key'] === 'i') {
+            insert_mode = true;
+            Tab.showCursor();
+        } else if (event['key'] === 'Escape') {
+            insert_mode = false;
+            Tab.hideCursor();
+        } else if (insert_mode) {
+            // Arrow keys move cursor
+            if (event['key'] === 'ArrowLeft') {
+                if (Tab.counter > 0) { Tab.counter--; Tab.MarkerMove(); Tab.showCursor(); }
+            } else if (event['key'] === 'ArrowRight') {
+                if (Tab.counter < tab_memory[0].length-1) { Tab.counter++; Tab.MarkerMove(); Tab.showCursor(); }
+            } else if (event['key'] === 'ArrowUp') {
+                if (insert_cursor_string > 0) { insert_cursor_string--; Tab.showCursor(); }
+            } else if (event['key'] === 'ArrowDown') {
+                if (insert_cursor_string < 5) { insert_cursor_string++; Tab.showCursor(); }
+            } else if (event['key'] === 'Backspace') {
+                // Delete at cursor
+                tab_memory[insert_cursor_string].splice(Tab.counter, 1);
+                Tab.TabAddition();
+                Tab.showCursor();
+            } else if (event.key.length === 1) {
+                // Insert/replace character at cursor
+                tab_memory[insert_cursor_string][Tab.counter] = event.key;
+                Tab.TabAddition();
+                Tab.showCursor();
+            }
+            event.preventDefault();
+        }
     }
 }
 
@@ -330,17 +353,15 @@ $(document).ready(function() {
 
     // Copy Last button
     $('#copy-last-btn').on('click', function() {
-        // Copy the last entered tab column (all 6 strings at Tab.counter)
+        // Insert the last entered tab column (all 6 strings at Tab.counter) again at the current cursor position
         let col = Tab.counter;
         if (col < 0) col = 0;
-        let lines = [];
         for (let s = 0; s < 6; s++) {
-            lines.push(tab_memory[s][col] || '-');
+            let val = tab_memory[s][col] || '-';
+            tab_memory[s].splice(Tab.counter, 0, val);
         }
-        let text = lines.join('\n');
-        navigator.clipboard.writeText(text).then(function() {
-            alert('Last tab/chord copied!');
-        });
+        Tab.counter++;
+        Tab.TabAddition();
     });
 
     // Insert Mode button
