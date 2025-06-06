@@ -353,14 +353,28 @@ $(document).ready(function() {
 
     // Copy Last button
     $('#copy-last-btn').on('click', function() {
-        // Insert the last entered tab column (all 6 strings at Tab.counter) again at the current cursor position
-        let col = Tab.counter;
-        if (col < 0) col = 0;
+        // For each string, find the last non-dash note before the cursor and insert it (with a dash after) at the current cursor
         for (let s = 0; s < 6; s++) {
-            let val = tab_memory[s][col] || '-';
-            tab_memory[s].splice(Tab.counter, 0, val);
+            let col = Tab.counter - 1;
+            let val = '-';
+            // Find the last non-dash note before the cursor
+            while (col >= 0) {
+                let v = tab_memory[s][col];
+                if (v && v !== '-') {
+                    val = v;
+                    break;
+                }
+                col--;
+            }
+            // Insert the note (with a dash after) at the cursor
+            if (val !== '-') {
+                tab_memory[s].splice(Tab.counter, 0, val);
+                tab_memory[s].splice(Tab.counter + 1, 0, '-');
+            } else {
+                tab_memory[s].splice(Tab.counter, 0, '-');
+            }
         }
-        Tab.counter++;
+        Tab.counter += 2;
         Tab.TabAddition();
     });
 
