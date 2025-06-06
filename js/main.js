@@ -291,35 +291,13 @@ function keyPressed(event) {
                 }
             }
         }
-        // VIM-like insert mode logic
+        // Insert Mode button
         else if (event['key'] === 'i') {
             insert_mode = true;
-            Tab.showCursor();
+            Tab.showTextEditor();
         } else if (event['key'] === 'Escape') {
             insert_mode = false;
-            Tab.hideCursor();
-        } else if (insert_mode) {
-            // Arrow keys move cursor
-            if (event['key'] === 'ArrowLeft') {
-                if (Tab.counter > 0) { Tab.counter--; Tab.MarkerMove(); Tab.showCursor(); }
-            } else if (event['key'] === 'ArrowRight') {
-                if (Tab.counter < tab_memory[0].length-1) { Tab.counter++; Tab.MarkerMove(); Tab.showCursor(); }
-            } else if (event['key'] === 'ArrowUp') {
-                if (insert_cursor_string > 0) { insert_cursor_string--; Tab.showCursor(); }
-            } else if (event['key'] === 'ArrowDown') {
-                if (insert_cursor_string < 5) { insert_cursor_string++; Tab.showCursor(); }
-            } else if (event['key'] === 'Backspace') {
-                // Delete at cursor
-                tab_memory[insert_cursor_string].splice(Tab.counter, 1);
-                Tab.TabAddition();
-                Tab.showCursor();
-            } else if (event.key.length === 1) {
-                // Insert/replace character at cursor
-                tab_memory[insert_cursor_string][Tab.counter] = event.key;
-                Tab.TabAddition();
-                Tab.showCursor();
-            }
-            event.preventDefault();
+            Tab.hideTextEditor();
         }
     }
 }
@@ -353,7 +331,7 @@ $(document).ready(function() {
 
     // Copy Last button
     $('#copy-last-btn').on('click', function() {
-        // For each string, find the last non-dash note before the cursor and insert it (with a dash after) at the current cursor
+        // For each string, find the last non-dash note before the cursor and insert it (with a dash before and after) at the current cursor
         for (let s = 0; s < 6; s++) {
             let col = Tab.counter - 1;
             let val = '-';
@@ -366,7 +344,12 @@ $(document).ready(function() {
                 }
                 col--;
             }
-            // Insert the note (with a dash after) at the cursor
+            // Insert a dash before if not already a dash
+            if (tab_memory[s][Tab.counter - 1] !== '-') {
+                tab_memory[s].splice(Tab.counter, 0, '-');
+                Tab.counter++;
+            }
+            // Insert the note and a dash after
             if (val !== '-') {
                 tab_memory[s].splice(Tab.counter, 0, val);
                 tab_memory[s].splice(Tab.counter + 1, 0, '-');

@@ -212,3 +212,46 @@ Tab.prototype.hideCursor = function() {
     var vis = this;
     vis.svg.selectAll('.tab_cursor').remove();
 };
+
+Tab.prototype.toText = function() {
+    // Convert tab_memory to 6 lines of text
+    let lines = [];
+    for (let s = 0; s < 6; s++) {
+        let line = tab_memory[s].join("");
+        lines.push(line);
+    }
+    return lines.join("\n");
+};
+
+Tab.prototype.fromText = function(text) {
+    // Parse 6 lines of text into tab_memory
+    let lines = text.split(/\r?\n/);
+    for (let s = 0; s < 6; s++) {
+        let line = lines[s] || "";
+        tab_memory[s] = line.split("");
+    }
+    Tab.counter = 0;
+    this.TabAddition();
+};
+
+Tab.prototype.showTextEditor = function() {
+    var vis = this;
+    // Hide SVG
+    $(vis.svg.node()).hide();
+    // Show textarea
+    if (!$('#tab_textarea').length) {
+        $('#tab').append('<textarea id="tab_textarea" style="width:100%;height:100%;font-family:monospace;font-size:16px;resize:none"></textarea>');
+    }
+    $('#tab_textarea').val(vis.toText()).show().focus();
+};
+
+Tab.prototype.hideTextEditor = function() {
+    var vis = this;
+    // Hide textarea
+    let val = $('#tab_textarea').val();
+    $('#tab_textarea').hide();
+    // Show SVG
+    $(vis.svg.node()).show();
+    // Parse text back into tab
+    vis.fromText(val);
+};
