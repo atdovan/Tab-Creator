@@ -21,6 +21,7 @@ var pull_off = false;
 var slide_up = false;
 var slide_down = false;
 var bend = false;
+var full_bend = false;
 var release = false;
 var space = false;
 var fast_scrolling = false;
@@ -32,6 +33,8 @@ var help = false;
 // Create an array to remember saved chords
 var saved_chords = [];
 var saved_chords_map = [];
+
+var insert_mode = false;
 
 document.addEventListener("keydown", keyPressed, false);
 
@@ -142,6 +145,29 @@ function keyPressed(event) {
                 } else {
                     FretBoard.current_tone = "h";
                     Legend.hammer.attr("fill", "green").style("opacity", .75);
+                }
+            } else if (event['key'] === "f") {
+                full_bend = !full_bend;
+
+                toggle_off(Legend.hammer);
+                hammer_on = false;
+                toggle_off(Legend.pull);
+                pull_off = false;
+                toggle_off(Legend.slide_up);
+                slide_up = false;
+                toggle_off(Legend.slide_down);
+                slide_down = false;
+                toggle_off(Legend.bend);
+                bend = false;
+                toggle_off(Legend.release);
+                release = false;
+
+                if (full_bend === false) {
+                    Legend.full_bend.attr("fill", "lightgrey").style("opacity", 1);
+                    FretBoard.current_tone = "-";
+                } else {
+                    Legend.full_bend.attr("fill", "green").style("opacity", .75);
+                    FretBoard.current_tone = "bf";
                 }
             } else if (event['key'] === "p") {
                 pull_off = !pull_off
@@ -283,3 +309,43 @@ function makeFredBoard() {
      ChordSearch = new ChordSearch("saved", ChordSearch);
      Help = new Help("tab", FretBoard);
 }
+
+// Add event listeners for new buttons after DOMContentLoaded or at the end of the file
+$(document).ready(function() {
+    // Load Tab button
+    $('#load-btn').on('click', function() {
+        $('#load-file').click();
+    });
+    $('#load-file').on('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(evt) {
+            Tab.loadTabFromText(evt.target.result);
+        };
+        reader.readAsText(file);
+        // Reset file input
+        $(this).val('');
+    });
+
+    // Copy Last button
+    $('#copy-last-btn').on('click', function() {
+        // Copy the last entered tab column (all 6 strings at Tab.counter)
+        let col = Tab.counter;
+        if (col < 0) col = 0;
+        let lines = [];
+        for (let s = 0; s < 6; s++) {
+            lines.push(tab_memory[s][col] || '-');
+        }
+        let text = lines.join('\n');
+        navigator.clipboard.writeText(text).then(function() {
+            alert('Last tab/chord copied!');
+        });
+    });
+
+    // Insert Mode button
+    $('#insert-mode-btn').on('click', function() {
+        insert_mode = !insert_mode;
+        $(this).val('Insert Mode: ' + (insert_mode ? 'On' : 'Off'));
+    });
+});

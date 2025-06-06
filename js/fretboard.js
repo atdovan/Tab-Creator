@@ -216,17 +216,18 @@ FretBoard.prototype.shiftReleased = function() {
     // Adding the dash for after automatically
     // If there is a tonal, add it as well
     for (var j = 0; j < 6; j++) {
-            tab_memory[j].splice(Tab.counter+1, 0, "-");
-            if (Tab.counter > 0) {
-                if (vis.current_click[j] !== "-" && vis.current_click[j] !== "--") {
-                    if (tab_memory[j][Tab.counter-1] !== "-" && tab_memory[j][Tab.counter-1] !== "--") {
-                        tab_memory[j][Tab.counter] = vis.current_tone;
-                    } else if (vis.current_tone == "/" || vis.current_tone == "\\") {
-                        tab_memory[j][Tab.counter] = vis.current_tone;
-                    }
+        var insertAt = (typeof insert_mode !== 'undefined' && insert_mode) ? Tab.counter : Tab.counter+1;
+        tab_memory[j].splice(insertAt, 0, "-");
+        if (Tab.counter > 0) {
+            if (vis.current_click[j] !== "-" && vis.current_click[j] !== "--") {
+                if (tab_memory[j][Tab.counter-1] !== "-" && tab_memory[j][Tab.counter-1] !== "--") {
+                    tab_memory[j][Tab.counter] = vis.current_tone;
+                } else if (vis.current_tone == "/" || vis.current_tone == "\\") {
+                    tab_memory[j][Tab.counter] = vis.current_tone;
                 }
             }
         }
+    }
 
     // Resetting the variable
     vis.current_tone = "-";
@@ -242,8 +243,8 @@ FretBoard.prototype.shiftReleased = function() {
     // Updating tab_memory if space was clicked
     if (space === true) {
         for (var j = 0; j < 6; j++) {
-            // Adding at a particular value
-            tab_memory[j].splice(Tab.counter+1, 0, "-");
+            var insertAt = (typeof insert_mode !== 'undefined' && insert_mode) ? Tab.counter : Tab.counter+1;
+            tab_memory[j].splice(insertAt, 0, "-");
         }
         space = false
     }
@@ -269,8 +270,8 @@ FretBoard.prototype.shiftReleased = function() {
 
         // updating tab memory
         for (var j = 0; j < 6; j++) {
-            // Adding at a particular value
-            tab_memory[j].splice(Tab.counter+1, 0, vis.current_click[j]);
+            var insertAt = (typeof insert_mode !== 'undefined' && insert_mode) ? Tab.counter : Tab.counter+1;
+            tab_memory[j].splice(insertAt, 0, vis.current_click[j]);
         }
 
         // reverting back
@@ -284,7 +285,7 @@ FretBoard.prototype.shiftReleased = function() {
     // Toggling off the current highlight
     vis.current_highlight = ["-", "-", "-", "-", "-", "-"]
 
-    Tab.counter = Tab.counter + 2
+    Tab.counter = (typeof insert_mode !== 'undefined' && insert_mode) ? Tab.counter + 1 : Tab.counter + 2;
 
     Tab.TabAddition();
 };

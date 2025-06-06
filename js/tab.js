@@ -139,3 +139,47 @@ Tab.prototype.makeTabKey = function() {
         else {tab_key.push([key[i] + " |"])}
     }
 }
+
+Tab.prototype.loadTabFromText = function(text) {
+    var vis = this;
+    var lines = text.split(/\r?\n/).filter(l => l.trim() !== "");
+    // Remove header if present
+    if (lines[0].startsWith("export_name:")) {
+        lines.shift();
+    }
+    // Remove any empty lines at the start
+    while (lines.length && lines[0].trim() === "") lines.shift();
+    // Parse blocks of 6 lines
+    var blocks = [];
+    for (let i = 0; i < lines.length; i += 6) {
+        blocks.push(lines.slice(i, i + 6));
+    }
+    // Rebuild tab_memory
+    tab_memory = [[], [], [], [], [], []];
+    for (let b = 0; b < blocks.length; b++) {
+        let block = blocks[b];
+        for (let s = 0; s < 6; s++) {
+            let line = block[s] || "";
+            // Remove key signature if present
+            let pipeIdx = line.indexOf("|");
+            if (pipeIdx !== -1) {
+                line = line.slice(pipeIdx + 1);
+            }
+            // Split into characters
+            for (let c = 0; c < line.length; c++) {
+                if (!tab_memory[s][c]) tab_memory[s][c] = "";
+                tab_memory[s][c] += line[c];
+            }
+        }
+    }
+    // Fill in missing dashes for short lines
+    let maxLen = Math.max(...tab_memory.map(arr => arr.length));
+    for (let s = 0; s < 6; s++) {
+        for (let c = 0; c < maxLen; c++) {
+            if (!tab_memory[s][c]) tab_memory[s][c] = "-";
+        }
+    }
+    // Set counter to end
+    Tab.counter = maxLen - 1;
+    vis.TabAddition();
+};
